@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+
+{% block title %}About — Smart Flood Guard{% endblock %}
+{% block nav_about %}bg-brand-800{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
+    <!-- ========== HERO ========== -->
+    <div class="text-center mb-16">
+        <div class="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707"/>
+            </svg>
+        </div>
+        <h1 class="text-4xl font-bold text-brand-900 mb-4">Smart Flood Guard</h1>
+        <p class="text-xl text-gray-500 max-w-2xl mx-auto leading-relaxed">
+            An AI and IoT based flood early warning system designed to monitor environmental conditions in real time and provide timely flood risk alerts.
+        </p>
+    </div>
+
+    <!-- ========== WHAT IS IT ========== -->
+    <section class="mb-14">
+        <h2 class="text-2xl font-bold text-brand-900 mb-4">What is Smart Flood Guard?</h2>
+        <p class="text-gray-600 leading-relaxed mb-4">
+            Smart Flood Guard is a complete end-to-end flood monitoring solution that combines hardware sensors, a cloud-connected backend, and a real-time web dashboard. It continuously tracks critical environmental parameters — <strong>water level</strong>, <strong>temperature</strong>, and <strong>humidity</strong> — and alerts users when conditions approach or exceed dangerous thresholds.
+        </p>
+        <p class="text-gray-600 leading-relaxed">
+            The system is built around an <strong>ESP32 microcontroller</strong> that reads data from a DHT11 sensor and an analog water level sensor. When readings cross predefined thresholds, a red LED and buzzer activate on the hardware, and the dashboard updates with real-time warnings. All data is transmitted to a FastAPI backend and stored in a PostgreSQL database for historical analysis and trend visualization.
+        </p>
+    </section>
+
+    <!-- ========== HOW IT WORKS ========== -->
+    <section class="mb-14">
+        <h2 class="text-2xl font-bold text-brand-900 mb-6">How It Works</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+            <!-- Step 1 -->
+            <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 text-center hover:shadow-md transition">
+                <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/>
+                    </svg>
+                </div>
+                <h3 class="font-bold text-brand-900 mb-2">1. Sense</h3>
+                <p class="text-sm text-gray-500">
+                    ESP32 reads water level, temperature, and humidity from hardware sensors every 1.5 seconds. If thresholds are exceeded, the LED and buzzer activate immediately.
+                </p>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 text-center hover:shadow-md transition">
+                <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </div>
+                <h3 class="font-bold text-brand-900 mb-2">2. Transmit</h3>
+                <p class="text-sm text-gray-500">
+                    Sensor data is buffered locally and sent in batches via HTTP POST over WiFi to the FastAPI backend, ensuring no readings are lost even under network delays.
+                </p>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 text-center hover:shadow-md transition">
+                <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                    </svg>
+                </div>
+                <h3 class="font-bold text-brand-900 mb-2">3. Visualize</h3>
+                <p class="text-sm text-gray-500">
+                    The web dashboard displays live metrics, trend charts, alert history, and risk levels. Data is stored in PostgreSQL for long-term analysis.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== ARCHITECTURE ========== -->
+    <section class="mb-14">
+        <h2 class="text-2xl font-bold text-brand-900 mb-6">System Architecture</h2>
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-8">
+            <div class="flex flex-col md:flex-row items-center justify-between space-y-6 md:space-y-0 md:space-x-4 text-center">
+
+                <div class="flex-1">
+                    <div class="w-14 h-14 bg-blue-50 rounded-xl flex items-center justify-center mx-auto mb-3">
+                        <span class="text-2xl">📡</span>
+                    </div>
+                    <h4 class="font-bold text-sm text-brand-900">ESP32 + Sensors</h4>
+                    <p class="text-xs text-gray-400 mt-1">DHT11, Water Level<br>Red LED, Buzzer</p>
+                </div>
+
+                <svg class="w-8 h-8 text-gray-300 hidden md:block flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                <span class="text-gray-300 md:hidden text-2xl">↓</span>
+
+                <div class="flex-1">
+                    <div class="w-14 h-14 bg-green-50 rounded-xl flex items-center justify-center mx-auto mb-3">
+                        <span class="text-2xl">⚡</span>
+                    </div>
+                    <h4 class="font-bold text-sm text-brand-900">FastAPI Backend</h4>
+                    <p class="text-xs text-gray-400 mt-1">REST API<br>Data Processing</p>
+                </div>
+
+                <svg class="w-8 h-8 text-gray-300 hidden md:block flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                <span class="text-gray-300 md:hidden text-2xl">↓</span>
+
+                <div class="flex-1">
+                    <div class="w-14 h-14 bg-purple-50 rounded-xl flex items-center justify-center mx-auto mb-3">
+                        <span class="text-2xl">🗄️</span>
+                    </div>
+                    <h4 class="font-bold text-sm text-brand-900">PostgreSQL (Neon)</h4>
+                    <p class="text-xs text-gray-400 mt-1">Cloud Database<br>Historical Storage</p>
+                </div>
+
+                <svg class="w-8 h-8 text-gray-300 hidden md:block flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                <span class="text-gray-300 md:hidden text-2xl">↓</span>
+
+                <div class="flex-1">
+                    <div class="w-14 h-14 bg-orange-50 rounded-xl flex items-center justify-center mx-auto mb-3">
+                        <span class="text-2xl">📊</span>
+                    </div>
+                    <h4 class="font-bold text-sm text-brand-900">Web Dashboard</h4>
+                    <p class="text-xs text-gray-400 mt-1">Real-time Charts<br>Alerts & Monitoring</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== MONITORED METRICS ========== -->
+    <section class="mb-14">
+        <h2 class="text-2xl font-bold text-brand-900 mb-6">Monitored Metrics</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex items-start space-x-4">
+                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v.586l1.293-1.293a1 1 0 111.414 1.414L10 7.414 6.293 3.707a1 1 0 111.414-1.414L9 3.586V3a1 1 0 011-1zM3 9a1 1 0 011-1h12a1 1 0 011 1v8a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/></svg>
+                </div>
+                <div>
+                    <h4 class="font-bold text-brand-900">Water Level</h4>
+                    <p class="text-sm text-gray-500">Analog sensor reading (0–4095) representing current water depth. Primary flood indicator.</p>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex items-start space-x-4">
+                <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v13m0 0a4 4 0 110 0zm0 0V3"/></svg>
+                </div>
+                <div>
+                    <h4 class="font-bold text-brand-900">Temperature</h4>
+                    <p class="text-sm text-gray-500">Ambient temperature in Celsius from the DHT11 sensor. Helps correlate weather conditions with flood risk.</p>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex items-start space-x-4">
+                <div class="w-10 h-10 bg-teal-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <svg class="w-5 h-5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 21c-4.97 0-9-4.03-9-9 0-3.87 3.13-7.81 9-12 5.87 4.19 9 8.13 9 12 0 4.97-4.03 9-9 9z"/></svg>
+                </div>
+                <div>
+                    <h4 class="font-bold text-brand-900">Humidity</h4>
+                    <p class="text-sm text-gray-500">Relative humidity percentage from the DHT11 sensor. High humidity often precedes heavy rainfall.</p>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex items-start space-x-4">
+                <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                </div>
+                <div>
+                    <h4 class="font-bold text-brand-900">Alert Status</h4>
+                    <p class="text-sm text-gray-500">Real-time alert flag based on water level threshold. Activates hardware LED and buzzer when danger is detected.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== WHY IT MATTERS ========== -->
+    <section class="mb-14">
+        <h2 class="text-2xl font-bold text-brand-900 mb-4">Why It Matters</h2>
+        <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-8 border border-blue-200">
+            <p class="text-gray-700 leading-relaxed mb-4">
+                Flooding is one of the most destructive and frequently occurring natural disasters worldwide. Early detection and timely alerts can significantly reduce the loss of life and property. Traditional flood monitoring methods are often expensive, slow, and limited in coverage.
+            </p>
+            <p class="text-gray-700 leading-relaxed mb-4">
+                Smart Flood Guard addresses this gap by providing an <strong>affordable, real-time, IoT-based monitoring solution</strong> that can be deployed in flood-prone areas. By combining continuous sensor data with an accessible web dashboard, it empowers communities and decision-makers to act before conditions become critical.
+            </p>
+            <p class="text-gray-700 leading-relaxed">
+                The integration of AI and data analytics allows the system to move beyond simple threshold-based alerts toward <strong>predictive flood risk assessment</strong>, identifying patterns and trends that may indicate rising danger before traditional methods would detect them.
+            </p>
+        </div>
+    </section>
+
+    <!-- ========== TECH STACK ========== -->
+    <section class="mb-8">
+        <h2 class="text-2xl font-bold text-brand-900 mb-6">Technology Stack</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="bg-white rounded-lg border border-gray-100 p-4 text-center">
+                <p class="font-bold text-sm text-brand-900">ESP32</p>
+                <p class="text-xs text-gray-400">Microcontroller</p>
+            </div>
+            <div class="bg-white rounded-lg border border-gray-100 p-4 text-center">
+                <p class="font-bold text-sm text-brand-900">FastAPI</p>
+                <p class="text-xs text-gray-400">Backend Framework</p>
+            </div>
+            <div class="bg-white rounded-lg border border-gray-100 p-4 text-center">
+                <p class="font-bold text-sm text-brand-900">PostgreSQL</p>
+                <p class="text-xs text-gray-400">Cloud Database (Neon)</p>
+            </div>
+            <div class="bg-white rounded-lg border border-gray-100 p-4 text-center">
+                <p class="font-bold text-sm text-brand-900">Chart.js</p>
+                <p class="text-xs text-gray-400">Data Visualization</p>
+            </div>
+            <div class="bg-white rounded-lg border border-gray-100 p-4 text-center">
+                <p class="font-bold text-sm text-brand-900">DHT11</p>
+                <p class="text-xs text-gray-400">Temp & Humidity</p>
+            </div>
+            <div class="bg-white rounded-lg border border-gray-100 p-4 text-center">
+                <p class="font-bold text-sm text-brand-900">Water Level Sensor</p>
+                <p class="text-xs text-gray-400">Analog Input</p>
+            </div>
+            <div class="bg-white rounded-lg border border-gray-100 p-4 text-center">
+                <p class="font-bold text-sm text-brand-900">Tailwind CSS</p>
+                <p class="text-xs text-gray-400">UI Framework</p>
+            </div>
+            <div class="bg-white rounded-lg border border-gray-100 p-4 text-center">
+                <p class="font-bold text-sm text-brand-900">Jinja2</p>
+                <p class="text-xs text-gray-400">Templating Engine</p>
+            </div>
+        </div>
+    </section>
+
+</div>
+{% endblock %}

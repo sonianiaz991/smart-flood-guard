@@ -1,0 +1,549 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard — Smart Flood Guard{% endblock %}
+{% block nav_dashboard %}bg-brand-800{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- ========== HEADER ========== -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-brand-900">Flood Monitoring Dashboard</h1>
+        <p class="text-gray-500 mt-1">Real-time environmental data from ESP32 sensors</p>
+    </div>
+
+    <!-- ========== ALERT BANNER (hidden by default) ========== -->
+    <div id="alert-banner" class="hidden mb-6 rounded-xl border-2 border-red-300 bg-red-50 p-5">
+        <div class="flex items-start space-x-4">
+            <div class="flex-shrink-0">
+                <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                    <svg class="w-7 h-7 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                    </svg>
+                </div>
+            </div>
+            <div>
+                <h3 class="text-lg font-bold text-red-800">Flood Alert Active</h3>
+                <p class="text-red-700 mt-1">Water level has exceeded the safety threshold. Red LED and buzzer are ON. Immediate attention required.</p>
+                <p class="text-red-500 text-sm mt-2" id="alert-time"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== TOP METRIC CARDS ========== -->
+    <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+
+        <!-- Water Level -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Water Level</span>
+                <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v.586l1.293-1.293a1 1 0 111.414 1.414L10 7.414 6.293 3.707a1 1 0 111.414-1.414L9 3.586V3a1 1 0 011-1zM3 9a1 1 0 011-1h12a1 1 0 011 1v8a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/></svg>
+                </div>
+            </div>
+            <p class="text-2xl font-bold text-gray-900" id="card-water">--</p>
+            <p class="text-xs text-gray-400 mt-1">out of 4095</p>
+            <div class="mt-3 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                <div class="h-full bg-blue-500 rounded-full transition-all duration-700" id="bar-water" style="width:0%"></div>
+            </div>
+        </div>
+
+        <!-- Temperature -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Temperature</span>
+                <div class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
+                    <svg class="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v13m0 0a4 4 0 110 0zm0 0V3"/></svg>
+                </div>
+            </div>
+            <p class="text-2xl font-bold text-gray-900" id="card-temp">--</p>
+            <p class="text-xs text-gray-400 mt-1" id="card-temp-range">Min -- / Max --</p>
+        </div>
+
+        <!-- Humidity -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Humidity</span>
+                <div class="w-8 h-8 bg-teal-100 rounded-lg flex items-center justify-center">
+                    <svg class="w-4 h-4 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 21c-4.97 0-9-4.03-9-9 0-3.87 3.13-7.81 9-12 5.87 4.19 9 8.13 9 12 0 4.97-4.03 9-9 9z"/></svg>
+                </div>
+            </div>
+            <p class="text-2xl font-bold text-gray-900" id="card-hum">--</p>
+            <p class="text-xs text-gray-400 mt-1" id="card-hum-range">Min -- / Max --</p>
+        </div>
+
+        <!-- Alert Status -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Alert</span>
+                <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center" id="icon-alert">
+                    <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2">
+                <span class="w-3 h-3 rounded-full bg-green-500 pulse-dot" id="dot-alert"></span>
+                <p class="text-lg font-bold" id="card-alert">Safe</p>
+            </div>
+            <p class="text-xs text-gray-400 mt-1" id="card-alert-count">0 alerts total</p>
+        </div>
+
+        <!-- LED / Buzzer -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition col-span-2 lg:col-span-1">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Hardware</span>
+                <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="text-center">
+                    <div class="w-8 h-8 rounded-full border-2 mx-auto mb-1 flex items-center justify-center" id="led-indicator">
+                        <span class="text-xs font-bold" id="led-text">OFF</span>
+                    </div>
+                    <span class="text-[10px] text-gray-400">RED LED</span>
+                </div>
+                <div class="text-center">
+                    <div class="w-8 h-8 rounded-full border-2 mx-auto mb-1 flex items-center justify-center" id="buzzer-indicator">
+                        <span class="text-xs font-bold" id="buzzer-text">OFF</span>
+                    </div>
+                    <span class="text-[10px] text-gray-400">BUZZER</span>
+                </div>
+            </div>
+            <p class="text-xs text-gray-400 mt-2" id="card-readings">-- readings</p>
+        </div>
+
+    </div>
+
+    <!-- ========== RISK GAUGE ========== -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
+        <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-4">Flood Risk Level</h2>
+        <div class="flex items-center space-x-3 mb-3">
+            <div class="flex-1 h-4 bg-gray-100 rounded-full overflow-hidden flex">
+                <div class="h-full bg-green-400 transition-all duration-700" id="gauge-safe" style="width:50%"></div>
+                <div class="h-full bg-yellow-400 transition-all duration-700" id="gauge-warn" style="width:25%"></div>
+                <div class="h-full bg-red-500 transition-all duration-700" id="gauge-danger" style="width:25%"></div>
+            </div>
+        </div>
+        <div class="flex justify-between text-xs text-gray-400">
+            <span>0 — Safe</span>
+            <span>2000 — Warning</span>
+            <span>3000 — Danger</span>
+            <span>4095</span>
+        </div>
+        <div class="mt-3 flex items-center space-x-2">
+            <span class="text-sm font-semibold" id="risk-label">Safe</span>
+            <span class="px-2 py-0.5 rounded-full text-xs font-bold" id="risk-badge">NORMAL</span>
+        </div>
+    </div>
+
+    <!-- ========== CHARTS ========== -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+
+        <!-- Water Level Chart -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-4">Water Level Over Time</h2>
+            <div style="position:relative; height:280px;"><canvas id="chart-water"></canvas></div>
+        </div>
+
+        <!-- Temperature Chart -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-4">Temperature Over Time</h2>
+            <div style="position:relative; height:280px;"><canvas id="chart-temp"></canvas></div>
+        </div>
+
+        <!-- Humidity Chart -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-4">Humidity Over Time</h2>
+            <div style="position:relative; height:280px;"><canvas id="chart-hum"></canvas></div>
+        </div>
+
+        <!-- Alert Timeline -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-4">Alert Status Timeline</h2>
+            <div style="position:relative; height:280px;"><canvas id="chart-alert"></canvas></div>
+        </div>
+
+    </div>
+
+    <!-- ========== COMBINED TREND CHART ========== -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
+        <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-4">Combined Sensor Trend</h2>
+        <div style="position:relative; height:320px;"><canvas id="chart-combined"></canvas></div>
+    </div>
+
+    <!-- ========== RECENT READINGS TABLE ========== -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-8">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wide">Recent Readings</h2>
+            <span class="text-xs text-gray-400" id="table-count">Showing 0 entries</span>
+        </div>
+        <div class="overflow-x-auto overflow-y-auto max-h-[480px] border border-gray-100 rounded-lg">
+            <table class="w-full text-sm">
+                <thead class="sticky top-0 bg-white z-10">
+                    <tr class="border-b border-gray-200 text-left text-xs font-semibold text-gray-400 uppercase">
+                        <th class="py-3 pr-4 pl-3">#</th>
+                        <th class="py-3 pr-4">Timestamp</th>
+                        <th class="py-3 pr-4">Temp</th>
+                        <th class="py-3 pr-4">Humidity</th>
+                        <th class="py-3 pr-4">Water Level</th>
+                        <th class="py-3 pr-4">Alert</th>
+                        <th class="py-3 pr-3">LED</th>
+                    </tr>
+                </thead>
+                <tbody id="readings-table" class="divide-y divide-gray-50">
+                    <tr><td colspan="7" class="py-8 text-center text-gray-400">Loading data...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ========== LAST UPDATED ========== -->
+    <div class="text-center text-xs text-gray-400 mb-4">
+        Last refreshed: <span id="last-refresh">--</span> &middot; Auto-refreshes every 3 seconds
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// ===================================================
+//  Smart Flood Guard — Dashboard JavaScript
+//  Fetches data from /api/* and updates UI + charts
+// ===================================================
+
+// Thresholds matching ESP32 code
+const THRESHOLD_WARN   = 2000;
+const THRESHOLD_DANGER = 3000;
+const MAX_WATER        = 4095;
+
+// Chart instances
+let chartWater, chartTemp, chartHum, chartAlert, chartCombined;
+
+// ---- Chart.js default styling ----
+Chart.defaults.font.family = "'Inter','Segoe UI',system-ui,sans-serif";
+Chart.defaults.font.size = 11;
+Chart.defaults.plugins.legend.display = false;
+Chart.defaults.elements.point.radius = 2;
+Chart.defaults.elements.point.hoverRadius = 5;
+Chart.defaults.elements.line.tension = 0.3;
+
+// ---- Format timestamp for display ----
+function fmt(ts) {
+    const d = new Date(ts);
+    return d.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+}
+function fmtFull(ts) {
+    const d = new Date(ts);
+    return d.toLocaleString([], { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit', second:'2-digit' });
+}
+
+// ---- Create gradient fill for charts ----
+function makeGradient(ctx, r, g, b) {
+    const grad = ctx.createLinearGradient(0, 0, 0, 300);
+    grad.addColorStop(0, `rgba(${r},${g},${b},0.25)`);
+    grad.addColorStop(1, `rgba(${r},${g},${b},0.02)`);
+    return grad;
+}
+
+// ---- Initialize all charts ----
+function initCharts() {
+    const commonOpts = (yLabel, yMin, yMax) => ({
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode:'index', intersect:false },
+        animation: { duration:0 },
+        plugins: {
+            tooltip: {
+                backgroundColor:'rgba(15,36,64,0.9)', titleFont:{weight:'600'},
+                padding:10, cornerRadius:8, displayColors:false
+            }
+        },
+        scales: {
+            x: { grid:{display:false}, ticks:{maxTicksLimit:8, font:{size:10}} },
+            y: { grid:{color:'rgba(0,0,0,0.04)'}, min:yMin, max:yMax,
+                 ticks:{font:{size:10}}, title:{display:true, text:yLabel, font:{size:11}} }
+        }
+    });
+
+    const ctx1 = document.getElementById('chart-water').getContext('2d');
+    chartWater = new Chart(ctx1, {
+        type:'line',
+        data: { labels:[], datasets:[{
+            label:'Water Level', data:[], borderColor:'#3b82f6', borderWidth:2,
+            fill:true, backgroundColor: makeGradient(ctx1,59,130,246)
+        }]},
+        options: commonOpts('Level (0–4500)', 0, 4500)
+    });
+
+    const ctx2 = document.getElementById('chart-temp').getContext('2d');
+    chartTemp = new Chart(ctx2, {
+        type:'line',
+        data: { labels:[], datasets:[{
+            label:'Temperature', data:[], borderColor:'#f97316', borderWidth:2,
+            fill:true, backgroundColor: makeGradient(ctx2,249,115,22)
+        }]},
+        options: commonOpts('Temp (°C)', 15, 50)
+    });
+
+    const ctx3 = document.getElementById('chart-hum').getContext('2d');
+    chartHum = new Chart(ctx3, {
+        type:'line',
+        data: { labels:[], datasets:[{
+            label:'Humidity', data:[], borderColor:'#14b8a6', borderWidth:2,
+            fill:true, backgroundColor: makeGradient(ctx3,20,184,166)
+        }]},
+        options: commonOpts('Humidity (%)', 0, 100)
+    });
+
+    const ctx4 = document.getElementById('chart-alert').getContext('2d');
+    chartAlert = new Chart(ctx4, {
+        type:'bar',
+        data: { labels:[], datasets:[{
+            label:'Alert', data:[], backgroundColor:[], borderRadius:3, barThickness:6
+        }]},
+        options: { ...commonOpts('Status', 0, 1),
+            scales: {
+                ...commonOpts('',0,1).scales,
+                y: { ...commonOpts('',0,1).scales.y, ticks:{callback:v=>v?'ON':'OFF', stepSize:1} }
+            }
+        }
+    });
+
+    const ctx5 = document.getElementById('chart-combined').getContext('2d');
+    chartCombined = new Chart(ctx5, {
+        type:'line',
+        data: { labels:[], datasets:[
+            { label:'Water Level', data:[], borderColor:'#3b82f6', borderWidth:2, yAxisID:'y' },
+            { label:'Temperature', data:[], borderColor:'#f97316', borderWidth:2, yAxisID:'y1' },
+            { label:'Humidity',    data:[], borderColor:'#14b8a6', borderWidth:2, yAxisID:'y1' }
+        ]},
+        options: {
+            responsive:true, maintainAspectRatio:false,
+            animation:{duration:0},
+            interaction:{mode:'index', intersect:false},
+            plugins:{
+                legend:{display:true, position:'top', labels:{usePointStyle:true, pointStyle:'circle', padding:20, font:{size:11}}},
+                tooltip:{backgroundColor:'rgba(15,36,64,0.9)',padding:10,cornerRadius:8}
+            },
+            scales:{
+                x: {grid:{display:false}, ticks:{maxTicksLimit:10, font:{size:10}}},
+                y: {type:'linear', position:'left', title:{display:true,text:'Water Level',font:{size:11}},
+                    grid:{color:'rgba(0,0,0,0.04)'}, min:0, max:4500},
+                y1:{type:'linear', position:'right', title:{display:true,text:'Temp / Humidity',font:{size:11}},
+                    grid:{drawOnChartArea:false}, min:0, max:100}
+            }
+        }
+    });
+}
+
+// ---- Update card UI from latest data ----
+function updateCards(latest, stats) {
+    if (!latest) return;
+
+    const wl = latest.water_level;
+    const temp = latest.temperature;
+    const hum = latest.humidity;
+    const alertOn = latest.alert_status === 'ON';
+
+    // Values
+    document.getElementById('card-water').textContent = wl;
+    document.getElementById('card-temp').textContent  = temp.toFixed(1) + ' °C';
+    document.getElementById('card-hum').textContent   = hum.toFixed(1) + ' %';
+
+    // Water bar
+    const pct = Math.min((wl / MAX_WATER) * 100, 100);
+    const bar = document.getElementById('bar-water');
+    bar.style.width = pct + '%';
+    bar.className = 'h-full rounded-full transition-all duration-700 ' +
+        (wl > THRESHOLD_DANGER ? 'bg-red-500' : wl > THRESHOLD_WARN ? 'bg-yellow-400' : 'bg-blue-500');
+
+    // Stats ranges
+    if (stats) {
+        document.getElementById('card-temp-range').textContent = `Min ${stats.min_temp}° / Max ${stats.max_temp}°`;
+        document.getElementById('card-hum-range').textContent  = `Min ${stats.min_hum}% / Max ${stats.max_hum}%`;
+        document.getElementById('card-alert-count').textContent = `${stats.total_alerts} alerts total`;
+        document.getElementById('card-readings').textContent = `${stats.total_readings} readings`;
+    }
+
+    // Alert status
+    const dot  = document.getElementById('dot-alert');
+    const card = document.getElementById('card-alert');
+    const icon = document.getElementById('icon-alert');
+    if (alertOn) {
+        dot.className  = 'w-3 h-3 rounded-full bg-red-500 pulse-dot-red';
+        card.textContent = 'DANGER';
+        card.className = 'text-lg font-bold text-red-600';
+        icon.className = 'w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center';
+        icon.innerHTML = '<svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>';
+    } else {
+        dot.className  = 'w-3 h-3 rounded-full bg-green-500 pulse-dot';
+        card.textContent = 'Safe';
+        card.className = 'text-lg font-bold text-green-600';
+        icon.className = 'w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center';
+        icon.innerHTML = '<svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
+    }
+
+    // LED / Buzzer indicators
+    const ledOn = latest.led_status === 'ON';
+    const ledEl = document.getElementById('led-indicator');
+    const ledTx = document.getElementById('led-text');
+    ledEl.className = 'w-8 h-8 rounded-full border-2 mx-auto mb-1 flex items-center justify-center ' +
+        (ledOn ? 'bg-red-500 border-red-600' : 'bg-gray-100 border-gray-300');
+    ledTx.textContent = ledOn ? 'ON' : 'OFF';
+    ledTx.className = 'text-xs font-bold ' + (ledOn ? 'text-white' : 'text-gray-400');
+
+    const buzEl = document.getElementById('buzzer-indicator');
+    const buzTx = document.getElementById('buzzer-text');
+    buzEl.className = 'w-8 h-8 rounded-full border-2 mx-auto mb-1 flex items-center justify-center ' +
+        (alertOn ? 'bg-yellow-400 border-yellow-500' : 'bg-gray-100 border-gray-300');
+    buzTx.textContent = alertOn ? 'ON' : 'OFF';
+    buzTx.className = 'text-xs font-bold ' + (alertOn ? 'text-yellow-900' : 'text-gray-400');
+
+    // Alert banner
+    const banner = document.getElementById('alert-banner');
+    if (alertOn) {
+        banner.classList.remove('hidden');
+        document.getElementById('alert-time').textContent = 'Last reading: ' + fmtFull(latest.timestamp);
+    } else {
+        banner.classList.add('hidden');
+    }
+
+    // Risk gauge
+    updateRiskGauge(wl);
+}
+
+// ---- Risk gauge bar ----
+function updateRiskGauge(wl) {
+    const safeW = Math.min(wl / MAX_WATER * 100, (THRESHOLD_WARN / MAX_WATER) * 100);
+    const warnW = wl > THRESHOLD_WARN ? Math.min((wl - THRESHOLD_WARN) / MAX_WATER * 100, ((THRESHOLD_DANGER - THRESHOLD_WARN) / MAX_WATER) * 100) : 0;
+    const dangW = wl > THRESHOLD_DANGER ? ((wl - THRESHOLD_DANGER) / MAX_WATER * 100) : 0;
+
+    document.getElementById('gauge-safe').style.width   = safeW + '%';
+    document.getElementById('gauge-warn').style.width   = warnW + '%';
+    document.getElementById('gauge-danger').style.width = dangW + '%';
+
+    const label = document.getElementById('risk-label');
+    const badge = document.getElementById('risk-badge');
+    if (wl > THRESHOLD_DANGER) {
+        label.textContent = 'Critical — Immediate risk';
+        label.className = 'text-sm font-semibold text-red-700';
+        badge.textContent = 'DANGER';
+        badge.className = 'px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-700';
+    } else if (wl > THRESHOLD_WARN) {
+        label.textContent = 'Elevated — Monitor closely';
+        label.className = 'text-sm font-semibold text-yellow-700';
+        badge.textContent = 'WARNING';
+        badge.className = 'px-2 py-0.5 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700';
+    } else {
+        label.textContent = 'Normal — All conditions safe';
+        label.className = 'text-sm font-semibold text-green-700';
+        badge.textContent = 'NORMAL';
+        badge.className = 'px-2 py-0.5 rounded-full text-xs font-bold bg-green-100 text-green-700';
+    }
+}
+
+// ---- Update charts from history ----
+function updateCharts(history) {
+    if (!history || !history.length) return;
+
+    const labels = history.map(r => fmt(r.timestamp));
+    const water  = history.map(r => r.water_level);
+    const temps  = history.map(r => r.temperature);
+    const hums   = history.map(r => r.humidity);
+    const alerts = history.map(r => r.alert_status === 'ON' ? 1 : 0);
+    const colors = alerts.map(a => a ? 'rgba(239,68,68,0.8)' : 'rgba(34,197,94,0.5)');
+
+    chartWater.data.labels = labels;
+    chartWater.data.datasets[0].data = water;
+    chartWater.update('none');
+
+    chartTemp.data.labels = labels;
+    chartTemp.data.datasets[0].data = temps;
+    chartTemp.update('none');
+
+    chartHum.data.labels = labels;
+    chartHum.data.datasets[0].data = hums;
+    chartHum.update('none');
+
+    chartAlert.data.labels = labels;
+    chartAlert.data.datasets[0].data = alerts;
+    chartAlert.data.datasets[0].backgroundColor = colors;
+    chartAlert.update('none');
+
+    chartCombined.data.labels = labels;
+    chartCombined.data.datasets[0].data = water;
+    chartCombined.data.datasets[1].data = temps;
+    chartCombined.data.datasets[2].data = hums;
+    chartCombined.update('none');
+}
+
+// ---- Update readings table ----
+function updateTable(history) {
+    const tbody = document.getElementById('readings-table');
+    if (!history || !history.length) {
+        tbody.innerHTML = '<tr><td colspan="7" class="py-8 text-center text-gray-400">No data available yet. Waiting for ESP32...</td></tr>';
+        document.getElementById('table-count').textContent = '0 entries';
+        return;
+    }
+
+    // Show most recent first in table (all entries, no limit)
+    const recent = [...history].reverse();
+    document.getElementById('table-count').textContent = `Showing ${recent.length} entries`;
+
+    let html = '';
+    recent.forEach(r => {
+        const isAlert = r.alert_status === 'ON';
+        const rowClass = isAlert ? 'bg-red-50' : '';
+        html += `
+            <tr class="${rowClass} hover:bg-gray-50 transition">
+                <td class="py-2.5 pr-4 text-gray-400 text-xs">${r.id}</td>
+                <td class="py-2.5 pr-4 text-xs font-mono">${fmtFull(r.timestamp)}</td>
+                <td class="py-2.5 pr-4 font-medium">${r.temperature.toFixed(1)}°C</td>
+                <td class="py-2.5 pr-4 font-medium">${r.humidity.toFixed(1)}%</td>
+                <td class="py-2.5 pr-4 font-medium">${r.water_level}</td>
+                <td class="py-2.5 pr-4">
+                    <span class="px-2 py-0.5 rounded-full text-xs font-bold ${isAlert ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}">${r.alert_status}</span>
+                </td>
+                <td class="py-2.5">
+                    <span class="px-2 py-0.5 rounded-full text-xs font-bold ${r.led_status==='ON' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-500'}">${r.led_status}</span>
+                </td>
+            </tr>`;
+    });
+    tbody.innerHTML = html;
+}
+
+// ---- Main fetch & refresh ----
+async function refreshAll() {
+    try {
+        const [latestRes, historyRes, statsRes] = await Promise.all([
+            fetch('/api/latest'),
+            fetch('/api/history?limit=200'),
+            fetch('/api/stats')
+        ]);
+
+        const latest  = await latestRes.json();
+        const history = await historyRes.json();
+        const stats   = await statsRes.json();
+
+        updateCards(latest.data, stats.data);
+        updateCharts(history.data);
+        updateTable(history.data);
+
+        document.getElementById('last-refresh').textContent = new Date().toLocaleTimeString();
+
+    } catch (err) {
+        console.error('Refresh failed:', err);
+        document.getElementById('last-refresh').textContent = 'Error — retrying...';
+    }
+}
+
+// ---- Init ----
+document.addEventListener('DOMContentLoaded', () => {
+    initCharts();
+    refreshAll();
+    // Auto-refresh every 10 seconds
+    setInterval(refreshAll, 3000);
+});
+</script>
+{% endblock %}

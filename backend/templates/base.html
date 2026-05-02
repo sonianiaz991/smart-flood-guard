@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Smart Flood Guard{% endblock %}</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 50:'#eff6ff', 100:'#dbeafe', 200:'#bfdbfe', 300:'#93c5fd', 400:'#60a5fa', 500:'#3b82f6', 600:'#2563eb', 700:'#1d4ed8', 800:'#1e3a5f', 900:'#0f2440' },
+                        safe:    { bg:'#ecfdf5', text:'#065f46', border:'#6ee7b7' },
+                        warn:    { bg:'#fffbeb', text:'#92400e', border:'#fcd34d' },
+                        danger:  { bg:'#fef2f2', text:'#991b1b', border:'#fca5a5' },
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+
+    <style>
+        body { font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif; }
+        .glass { background: rgba(255,255,255,0.8); backdrop-filter: blur(12px); }
+        .pulse-dot { animation: pulse-ring 2s ease-out infinite; }
+        @keyframes pulse-ring {
+            0%   { box-shadow: 0 0 0 0 rgba(34,197,94,0.5); }
+            70%  { box-shadow: 0 0 0 10px rgba(34,197,94,0); }
+            100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+        }
+        @keyframes pulse-ring-red {
+            0%   { box-shadow: 0 0 0 0 rgba(239,68,68,0.5); }
+            70%  { box-shadow: 0 0 0 10px rgba(239,68,68,0); }
+            100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+        }
+        .pulse-dot-red { animation: pulse-ring-red 1s ease-out infinite; }
+    </style>
+</head>
+
+<body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col">
+
+    <!-- ========== NAVBAR ========== -->
+    <nav class="bg-brand-900 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo -->
+                <a href="/" class="flex items-center space-x-3">
+                    <div class="w-9 h-9 bg-blue-500 rounded-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707"/>
+                        </svg>
+                    </div>
+                    <span class="font-bold text-lg tracking-tight">Smart Flood Guard</span>
+                </a>
+
+                <!-- Nav Links -->
+                <div class="flex items-center space-x-1">
+                    <a href="/" class="px-4 py-2 rounded-lg text-sm font-medium hover:bg-brand-800 transition {% block nav_dashboard %}{% endblock %}">
+                        <span class="hidden sm:inline">Dashboard</span>
+                        <svg class="w-5 h-5 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                    </a>
+                    <a href="/about" class="px-4 py-2 rounded-lg text-sm font-medium hover:bg-brand-800 transition {% block nav_about %}{% endblock %}">
+                        <span class="hidden sm:inline">About</span>
+                        <svg class="w-5 h-5 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </a>
+                </div>
+
+                <!-- Live indicator -->
+                <div class="flex items-center space-x-2" id="live-indicator">
+                    <span class="relative flex h-3 w-3">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                    </span>
+                    <span class="text-xs text-green-300 font-medium hidden sm:inline">LIVE</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <main class="flex-1">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- ========== FOOTER ========== -->
+    <footer class="bg-brand-900 text-gray-400 text-center py-6 mt-12">
+        <p class="text-sm">Smart Flood Guard &mdash; AI + IoT Based Flood Early Warning System</p>
+        <p class="text-xs mt-1 text-gray-500">ESP32 &middot; FastAPI &middot; PostgreSQL &middot; Chart.js</p>
+    </footer>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>
